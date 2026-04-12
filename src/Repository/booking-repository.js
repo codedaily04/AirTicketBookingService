@@ -39,17 +39,21 @@ class BookingRepository {
         }
     }
 
-    async updateBooking(id, data) {
+    async update(bookingId, data) {
         try {
-            const booking = await Booking.findByPk(id);
-            if (!booking) {
-                throw new Error('Booking not found');
+            const booking = await Booking.findByPk(bookingId);
+            if(data.status){
+                booking.status = data.status;
             }
-            await booking.update(data);
+            await booking.save();
             return booking;
         } catch (error) {
-            console.error('Error updating booking:', error);
-            throw error;
+            throw new AppError(
+                'Repository Error',
+                'Error getting bookingId',
+                'There was some issue in updating the booking, please again later',
+                StatusCodes.INTERNAL_SERVER_ERROR
+            );
         }
     }
 
