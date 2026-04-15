@@ -26,6 +26,16 @@ class BookingService{
             }
             const totalCost = priceOfTheFlight * data.noOfSeats;
             const bookingPayload = {...data, totalCost};
+            /**
+             * const totalCost = 6000;
+
+             const bookingPayload = {
+               userId: 1,
+               flightId: 101,
+               noOfSeats: 3,
+               totalCost: 6000
+             };
+             */
             const booking = await this.bookingRepository.create(bookingPayload);
             const updateFlightRequestURL = `${FLIGHT_SERVICE_PATH}/api/v1/flights/${booking.flightId}`;
             console.log(updateFlightRequestURL);

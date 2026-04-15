@@ -1,28 +1,48 @@
 const { StatusCodes } = require('http-status-codes');
 const  { BookingService } = require('../services/index');
 
+const { createChannel, publishMessage } = require('../utils/messageQueue');
+const {REMINDER_BINDING_KEY}=require('../config/serverConfig');
+
 const bookingService = new BookingService();
 
-const create = async (req, res) => {
-    try {
-        const response = await bookingService.createBooking(req.body);
-        return res.status(StatusCodes.OK).json({
-            message: "Successfully created a booking",
-            success: true,
-            data: response,
-            err:{}
+class BookingController {
+
+    constructor(){
+       
+    }
+
+    //testing function
+    async sendMessageToQueue(req,res){
+        const channel = await createChannel();
+        const data={message:"Success"};
+        publishMessage(channel, REMINDER_BINDING_KEY, JSON.stringify(data));
+        return res.status(200).json({
+            message:'Successfully published the event'
         });
-    } catch (error) {
-        console.log(error);
-        return res.status(error.statusCode || 500).json({
-            data: {},
-            success: false,
-            message: error.message,
-            err: error.explanation
-        });
+    }
+
+    async create(req,res){
+        try {
+            const response = await bookingService.createBooking(req.body);
+            return res.status(StatusCodes.OK).json({
+                message: "Successfully created a booking",
+                success: true,
+                data: response,
+                err:{}
+            });
+        } catch (error) {
+            console.log(error);
+            return res.status(error.statusCode || 500).json({
+                data: {},
+                success: false,
+                message: error.message,
+                err: error.explanation
+            });
+        }
     }
 }
 
-module.exports = {
-    create
-}
+
+
+module.exports = BookingController;
