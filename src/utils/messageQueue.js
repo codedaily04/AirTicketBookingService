@@ -8,7 +8,7 @@ const createChannel=async()=>{
     await channel.assertExchange(EXCHANGE_NAME,'direct',false);
     return channel;
     } catch (error) {
-        console.log(error);
+        throw error;
     }
 }
 
@@ -27,12 +27,10 @@ const subscribeMessage=async (channel,service,binding_key)=>{
 //This one is used to publish the message, So, it works as producer
 const publishMessage=async (channel, binding_key, message)=>{
     try {
-        //EXCHANGE_NAME --> Distributors NAME
         await channel.assertQueue('QUEUE_NAME');
         await channel.publish(EXCHANGE_NAME, binding_key, Buffer.from(message));
-        console.log('Message published successfully');
     } catch (error) {
-        console.log(error);
+        throw error;
     }
 }
 
