@@ -14,10 +14,10 @@ class BookingController {
     //testing function
     async sendMessageToQueue(req,res){
         const channel = await createChannel();
-        const data={message:'Success'};
+        const data = {message: 'Success'};
         publishMessage(channel, REMINDER_BINDING_KEY, JSON.stringify(data));
         return res.status(200).json({
-            message:'Successfully published the event'
+            message: 'Succesfully published the event'
         });
     }
 

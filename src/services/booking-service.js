@@ -3,6 +3,8 @@ const axios = require('axios');
 const{BookingRepository} = require('../Repository/index');
 const {FLIGHT_SERVICE_PATH} = require('../config/serverConfig');
 const ServiceError = require('../utils/errors/service-error');
+const { createChannel, publishMessage } = require('../utils/messageQueue');
+const { REMINDER_BINDING_KEY } = require('../config/serverConfig');
 
 class BookingService{
     constructor(){
@@ -13,9 +15,9 @@ class BookingService{
         try {
             //First of all, we need to fetch the flightId from FlightAndSearch Microservice
             const flightId = data.flightId;
-            // console.log(FLIGHT_SERVICE_PATH); 
+            console.log(FLIGHT_SERVICE_PATH); 
             const getFlightRequestURL = `${FLIGHT_SERVICE_PATH}/api/v1/flights/${flightId}`;
-            // console.log("URL:", getFlightRequestURL);
+            console.log("URL:", getFlightRequestURL);
             const response = await axios.get(getFlightRequestURL);
             // console.log("FULL RESPONSE:", response.data); 
             const flightData = response.data.data;
@@ -41,8 +43,18 @@ class BookingService{
             console.log(updateFlightRequestURL);
             await axios.patch(updateFlightRequestURL, {totalSeats: flightData.totalSeats - booking.noOfSeats});
             const finalBooking = await this.bookingRepository.update(booking.id, {status: "Booked"});
+            const payload={
+                data:{
+                    subject:'Booked A Ticket',
+                    content:'Congratulations! Your ticket has been successfully booked.',
+                    recepientEmail :'24202@iiitu.ac.in',
+                    notificationTime: new Date()
+                },
+                service:'CREATE_TICKET'
+            };
+            const channel = await createChannel();
+            publishMessage(channel, REMINDER_BINDING_KEY, JSON.stringify(payload));
             return finalBooking;
-                // return booking;
 
         } catch (error) {
             if(error.name=='RepositoryError' || error.name=='ValidationError'){
